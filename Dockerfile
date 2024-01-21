@@ -10,7 +10,7 @@ RUN sudo apt-get install cmake -y
 RUN sudo apt-get install libx11-dev -y
 RUN sudo apt-get install gcc -y
 
-RUN sudo apt-get install cuda
+RUN sudo apt-get install cuda -y
 
 RUN sudo ln -s /usr/local/cuda-11.8 /usr/local/cuda
 
