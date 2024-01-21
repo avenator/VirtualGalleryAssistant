@@ -10,7 +10,14 @@ RUN sudo apt-get install cmake -y
 RUN sudo apt-get install libx11-dev -y
 RUN sudo apt-get install gcc -y
 
+RUN sudo apt-get install cuda
+
 RUN sudo ln -s /usr/local/cuda-11.8 /usr/local/cuda
+
+RUN export LD_LIBRARY_PATH="/usr/local/cuda-12.1/lib64:$LD_LIBRARY_PATH"
+RUN export PATH="/usr/local/cuda-12.1/bin:$PATH"
+
+
 
 RUN pip install -r requirements.txt
 
