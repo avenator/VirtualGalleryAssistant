@@ -10,7 +10,6 @@
 - Style Tranfer выполен с использованием fine - tuned версии [JoJoGan](https://github.com/mchong6/JoJoGAN)
 - Замена лица была выполнена с помощью [FaceSwap](https://github.com/wuhuikai/FaceSwap/tree/master)  
 - Веса моделей, необходимые для запуска бота на [диске](https://drive.google.com/drive/folders/1ex0Ixlh2yc92T3nyrahBRbJai9VlbTGS?usp=sharing)
-## Style Transfer (alpha=1)
 
 Исходная фотография        |  Картина                  |  Стилизованная фотография |  Итоговая фотография
 :-------------------------:|:-------------------------:|:-------------------------:|:-------------------------:
