@@ -30,6 +30,9 @@ google_drive_paths = {
     "models/supergirl_preserve_color.pt": "https://drive.google.com/uc?id=1VmKGuvThWHym7YuayXxjv0fSn32lfDpE",
 }
 
+class Args:
+    def __init__(self):
+        pass
 
 @torch.no_grad()
 def load_model(generator, model_file_path):
