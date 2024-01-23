@@ -4,21 +4,31 @@ import sys
 from copy import deepcopy
 from io import BytesIO
 
+import cv2
 from aiogram import Bot, Dispatcher, types
-from aiogram.filters import Command
 from aiogram.filters import CommandStart
 from aiogram.types import FSInputFile, Message, BufferedInputFile
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.utils.media_group import MediaGroupBuilder
 from torchvision import utils
 
+from FaceSwap.face_detection import select_face, select_all_faces
+from FaceSwap.face_swap import face_swap
 from e4e_projection import projection as e4e_projection
 from model import *
 from util import *
 
+# dir_path = os.path.dirname(args.out)
+# if not os.path.isdir(dir_path):
+#    os.makedirs(dir_path)
+
+
 logging.getLogger().setLevel(logging.ERROR)
 logging.basicConfig(level=logging.INFO)
 
+args = Args()
+args.correct_color = True
+args.warp_2d = True
 bot = Bot(token=BOT_TOKEN)
 
 user_buffer = {}
@@ -45,10 +55,15 @@ generator_mona_lisa.eval()
 
 dp = Dispatcher()
 
-monro = "pics/monro.jpg"
+monro = 'pics/monro.jpg'
 beethoven = 'pics/Beethoven.jpg'
 mona_lisa = 'pics/Mona-Lisa.jpg'
 gogh = 'pics/Gogh.jpg'
+
+monro_img = cv2.imread('pics/monro.jpg')
+beethoven_img = cv2.imread('pics/Beethoven.jpg')
+mona_img = cv2.imread('pics/Mona-Lisa.jpg')
+gogh_img = cv2.imread('pics/Gogh.jpg')
 
 
 @dp.message(CommandStart())
@@ -157,31 +172,56 @@ async def get_image(message):
     photo = await bot.download_file(file_info.file_path)
     await bot.send_message(message.chat.id,
                            "Обрабатываю ваше фото, это займет около минуты")
-    try:
-        output = await style_transfer(user_buffer[message.chat.id], photo)
-        await bot.send_document(message.chat.id, BufferedInputFile(deepcopy(output.getvalue()), "result.jpeg"))
-        await bot.send_photo(message.chat.id, BufferedInputFile(output.getvalue(), "result.jpeg"))
-    except RuntimeError as e:
-        await bot.send_message(message.chat.id,
-                               "Произошла ошибка.")
+    # try:
+    output = await style_transfer(user_buffer[message.chat.id], photo)
+    await bot.send_document(message.chat.id, BufferedInputFile(deepcopy(output.getvalue()), "result.jpeg"))
+    await bot.send_photo(message.chat.id, BufferedInputFile(output.getvalue(), "result.jpeg"))
+    # except RuntimeError as e:
+    #    print(e)
+    #    await bot.send_message(message.chat.id,
+    #                          "Произошла ошибка.")
 
 
 async def style_transfer(style, img_filename):
     with torch.no_grad():
         my_w = flatten_face(img_filename)
         if style == 1:
-            my_sample = generator_marilyn(my_w, input_is_latent=True)
+            src_img = generator_marilyn(my_w, input_is_latent=True)
+            dst_img = monro_img
         if style == 2:
-            my_sample = generator_gogh(my_w, input_is_latent=True)
+            src_img = generator_gogh(my_w, input_is_latent=True)
+            dst_img = gogh_img
         if style == 3:
-            my_sample = generator_mona_lisa(my_w, input_is_latent=True)
+            src_img = generator_mona_lisa(my_w, input_is_latent=True)
+            dst_img = mona_img
         if style == 4:
-            my_sample = generator_beethoven(my_w, input_is_latent=True)
-    return ndarray2img(my_sample)
+            src_img = generator_beethoven(my_w, input_is_latent=True)
+            dst_img = beethoven_img
+    rgb = np.rollaxis(utils.make_grid(src_img[0], normalize=True).numpy(), 0, 3)
+    rgb = Image.fromarray(np.uint8(rgb * 250))
+    opencv = cv2.cvtColor(np.array(rgb), cv2.COLOR_RGB2BGR)
+    src_points, src_shape, src_face = select_face(opencv)
+
+    # Select dst face
+    dst_faceBoxes = select_all_faces(dst_img)
+
+    output = dst_img
+    for k, dst_face in dst_faceBoxes.items():
+        output = face_swap(src_face, dst_face["face"], src_points,
+                           dst_face["points"], dst_face["shape"],
+                           output, args)
+    return cv2img(output)
 
 
-def ndarray2img(t):
-    output = np.rollaxis(utils.make_grid(t[0], normalize=True).numpy(), 0, 3)
+def cv2img(img):
+    is_success, buffer = cv2.imencode(".jpg", img)
+    bio = BytesIO(buffer)
+
+    return bio
+
+
+def ndarray2img(arr):
+    output = np.rollaxis(utils.make_grid(arr[0], normalize=True).numpy(), 0, 3)
     output = Image.fromarray(np.uint8(output * 250))
 
     bio = BytesIO()
