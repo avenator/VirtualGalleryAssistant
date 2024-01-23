@@ -18,11 +18,6 @@ from e4e_projection import projection as e4e_projection
 from model import *
 from util import *
 
-# dir_path = os.path.dirname(args.out)
-# if not os.path.isdir(dir_path):
-#    os.makedirs(dir_path)
-
-
 logging.getLogger().setLevel(logging.ERROR)
 logging.basicConfig(level=logging.INFO)
 
