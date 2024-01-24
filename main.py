@@ -171,9 +171,9 @@ async def get_image(message):
         output = await style_transfer(user_buffer[message.chat.id], photo)
         await bot.send_document(message.chat.id, BufferedInputFile(deepcopy(output.getvalue()), "result.jpeg"))
         await bot.send_photo(message.chat.id, BufferedInputFile(output.getvalue(), "result.jpeg"))
-    except RuntimeError as e:
+    except Exception as e:
         await bot.send_message(message.chat.id,
-                              "Произошла ошибка.")
+                              "Произошла неизвестная ошибка.")
         pass
 
 
