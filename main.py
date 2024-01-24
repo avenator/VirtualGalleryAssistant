@@ -167,14 +167,14 @@ async def get_image(message):
     photo = await bot.download_file(file_info.file_path)
     await bot.send_message(message.chat.id,
                            "Обрабатываю ваше фото, это займет около минуты")
-    # try:
-    output = await style_transfer(user_buffer[message.chat.id], photo)
-    await bot.send_document(message.chat.id, BufferedInputFile(deepcopy(output.getvalue()), "result.jpeg"))
-    await bot.send_photo(message.chat.id, BufferedInputFile(output.getvalue(), "result.jpeg"))
-    # except RuntimeError as e:
-    #    print(e)
-    #    await bot.send_message(message.chat.id,
-    #                          "Произошла ошибка.")
+    try:
+        output = await style_transfer(user_buffer[message.chat.id], photo)
+        await bot.send_document(message.chat.id, BufferedInputFile(deepcopy(output.getvalue()), "result.jpeg"))
+        await bot.send_photo(message.chat.id, BufferedInputFile(output.getvalue(), "result.jpeg"))
+    except RuntimeError as e:
+        await bot.send_message(message.chat.id,
+                              "Произошла ошибка.")
+        pass
 
 
 async def style_transfer(style, img_filename):
