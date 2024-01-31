@@ -5,6 +5,7 @@
 - Разработка tg-бота для того, чтобы сделать выставки в музеях более интерактивными.
 
 ## Интерфейс
+<img src="https://github.com/avenator/VirtualGalleryAssistant/blob/main/pics/example2.png" height="500" width="300"> 
 <img src="https://github.com/avenator/VirtualGalleryAssistant/blob/main/pics/example.png" height="500" width="300">
 
 - Style Tranfer выполен с использованием fine - tuned версии [JoJoGan](https://github.com/mchong6/JoJoGAN)
